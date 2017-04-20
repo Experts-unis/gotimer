@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+	TRACE : tous les messages
+    DEBUG :
+    INFO  : 
+    WARN  : les messages FATAL + ERROR + WARN
+    ERROR : les messages FATAL + ERROR
+    FATAL : juste les messages FATAL
+
+-->
+<Configuration name="Timer" status="error">
+  <properties>
+    <property name="log-path">log/</property>
+    <property name="filename">timer.log</property>
+  </properties>
+    <Appenders>
+        <Console name="Console">
+            <PatternLayout>
+                <Pattern>%d{dd/MMM/yyyy} %5p %c:%L - %m%n</Pattern>
+            </PatternLayout>
+        </Console>
+	<File name="File" fileName="${log-path}/${filename}">
+      <PatternLayout>
+        <pattern>%d %p %C:%L{1.} [%t] %m%n</pattern>
+      </PatternLayout>
+    </File>
+    <RollingFile name="RollingFile" fileName="${log-path}/rtimer.log"
+	filePattern="${log-path}/rtimer-%d{yyyy-MM-dd}-%i.log" >
+		<PatternLayout>
+			<pattern>%d{dd/MMM/yyyy HH:mm:ss}- %c{1}:%L %m%n</pattern>
+		</PatternLayout>
+		<Policies>
+			<SizeBasedTriggeringPolicy size="1 MB" />
+		</Policies>
+		<DefaultRolloverStrategy max="7"/>
+	</RollingFile>
+
+	</Appenders>
+	
+    <Loggers>
+        <Root level="TRACE">
+            <AppenderRef ref="Console"/>
+            <AppenderRef ref="File"/>
+            <AppenderRef ref="RollingFile"/>
+        </Root>
+<!--        
+	<Logger name="model.TableModelDB" level="OFF" additivity = "false"/>
+	<Logger name="model.ModelManager" level="OFF" additivity = "false"/>
+	<Logger name="model.DB" level="OFF" additivity = "false"/>
+	<Logger name="model.DBProgres" level="OFF" additivity = "false"/>
+	<Logger name="model.TProjetsModel" level="OFF" additivity = "false"/>
+	<Logger name="vue.MainView" level="TRACE" additivity = "false"/>
+-->
+	
+    </Loggers>
+</Configuration>

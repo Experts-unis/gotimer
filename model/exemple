@@ -1,0 +1,121 @@
+
+une classe renderer telle que celle ci :
+
+public class TraitementRenderer
+    extends DefaultTableCellRenderer {
+ 
+  protected TableCellRenderer renderer;
+  protected ColorProvider provider;
+  JLabel label = new JLabel();
+ 
+  public TraitementRenderer(TableCellRenderer aRenderer,
+                           ColorProvider provider) {
+    this.renderer = aRenderer;
+    this.provider = provider;
+  }
+ 
+  public Component getTableCellRendererComponent(JTable table, Object value,
+                                                 boolean isSelected,
+                                                 boolean hasFocus, int row,
+                                                 int column) {
+    Color bgrd = null;
+    Color fgrd = null;
+    if (isSelected) {
+      fgrd = table.getSelectionForeground();
+      bgrd = table.getSelectionBackground();
+    }
+    else {
+      // Adjust for columns moving around
+      int mcol = table.convertColumnIndexToModel(column);
+      // Get the colors from the provider
+      fgrd = provider.getForeground(row, mcol);
+      bgrd = provider.getBackground(row, mcol);
+    }
+    Component c =
+        renderer.getTableCellRendererComponent(
+        table,
+        value,
+        isSelected,
+        hasFocus,
+        row,
+        column);
+    // Set the component colours
+    c.setBackground(bgrd);
+    c.setForeground(fgrd);
+   
+}
+
+mettre dans la classe qui traite la JTable le code ci dessous : 
+private void registerRendererForClass(JTable table, Class classe) {
+    // Get Default Renderer from the table
+    DefaultTableCellRenderer defaultRenderer =
+        (DefaultTableCellRenderer)
+        table.getDefaultRenderer(classe);
+    // Wrap(Decorate) the color renderer around the default renderer
+    TableCellRenderer colorRenderer = new
+        TraitementRenderer(defaultRenderer, provider);
+    // Register the color Renderer with the JTable
+    table.setDefaultRenderer(classe, colorRenderer);
+  }
+ 
+  /**Inner classe implémentant l'interface colorprovider
+   * pour colorer les cellules, les lignes ou les colonnes
+   * */
+ 
+  ColorProvider provider = new ColorProvider() {
+    public Color getForeground(int row, int column) {
+      // colorie l'écriture des colonnes choisies
+      if (column == 2) {
+        return Color.BLUE;
+      }
+      if (column == 14) {
+        return Color.MAGENTA;
+      }
+      else {
+        return Color.black;
+      }
+    }
+ 
+    public Color getBackground(int row, int column) {
+      if (model.isEnded(row)) {
+        return Color.LIGHT_GRAY;
+      }
+      if (model.isNewLine(row)) {
+        return Color.cyan;
+      }
+      else {
+        return Color.white;
+      }
+    }
+  }; 
+  
+  tableau = new JTable(model);
+      registerRendererForClass(tableau, String.class);
+      registerRendererForClass(tableau, Integer.class);
+      registerRendererForClass(tableau, Date.class);
+      // pour la boolean.class, on n'utilise pas un defautTableCellRend.. mais un TableCellRend..
+      TableCellRenderer BRenderer = tableau.getDefaultRenderer(Boolean.class);
+      TableCellRenderer colorRenderer = new TraitementRenderer(BRenderer, provider);
+      tableau.setDefaultRenderer(Boolean.class, colorRenderer);
+      
+      
+      dans la classe qui étend l'AbstractTableModel on définit les lignes devant être coloriées 
+      
+      public boolean isEnded(int row) {
+    Date d = (Date)this.getValueAt(row, 10);  //colorie en gis les lignes dont la date de la colonne 10 est antérieure à la date du jour
+    if ( (d != null) && (d.before(new Date()))) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
+ 
+  public boolean isNewLine(int row) { // colorie en bleu les lignes ajoutée à la table
+    if ( (row == this.getRowCount() - 1) && (Traitement.newLine == true)) {
+      return true;
+    }
+    else {
+      return false;
+    }
+  }
